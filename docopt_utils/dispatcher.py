@@ -1,7 +1,27 @@
+import functools
+import logging
+import re
+import sys
 from inspect import getdoc
 
 from docopt import docopt
 from docopt import DocoptExit
+
+
+log = logging.getLogger(__name__)
+
+
+def dispatch(command_classes, args=None):
+    if not args:
+        args = sys.argv[1:]
+    try:
+        handler, options = parse(command_classes, docopt_opts={'options_first': True}, args=args)
+    except NoSuchCommand as e:
+        commands = '\n'.join(parse_section('commands:', getdoc(e.container)))
+        log.error(f'No such command: {e.command}\n{commands}')
+        sys.exit(1)
+
+    return functools.partial(perform_command, handler, options)
 
 
 def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}, args=None):
@@ -43,6 +63,17 @@ def get_handler(command_class, command):
         raise NoSuchCommand(command, command_class)
     instance = command_class()
     return getattr(instance, command)
+
+
+def perform_command(handler, options):
+    handler(options)
+
+
+# From docopt@master
+def parse_section(name, source):
+    pattern = re.compile('^([^\n]*' + name + '[^\n]*\n?(?:[ \t].*?(?:\n|$))*)',
+                         re.IGNORECASE | re.MULTILINE)
+    return [s.strip() for s in pattern.findall(source)]
 
 
 class NoSuchCommand(Exception):
