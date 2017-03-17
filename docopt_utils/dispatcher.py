@@ -43,7 +43,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
         raise SystemExit(command_help)
 
     command_handler = get_handler(command_class, command)
-    command_help = getdoc(handler)
+    command_help = getdoc(command_handler)
     if command_help is None:
         raise NoSuchCommand(command, command_class)
 
