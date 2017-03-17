@@ -16,16 +16,18 @@ def dispatch(command_classes, args=None, env=None):
     if not args:
         args = sys.argv[1:]
     try:
-        handler, options = parse(command_classes, docopt_opts={'options_first': True}, args=args)
+        handler, options = parse(command_classes, docopt_opts={'options_first': True},
+                                 args=args, env=None)
     except NoSuchCommand as e:
         commands = '\n'.join(parse_section('commands:', getdoc(e.container)))
         log.error(f'No such command: {e.command}\n{commands}')
         sys.exit(1)
 
-    return functools.partial(perform_command, handler, options, env)
+    return functools.partial(perform_command, handler, options)
 
 
-def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}, args=None):
+def parse(command_classes, command='__root__', command_opts=None, docopt_opts={},
+          args=None, env=None):
     command_class = command_classes.get(command)
     if not command_class:
         raise Exception()
@@ -48,6 +50,15 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
         raise NoSuchCommand(command, command_class)
 
     command_opts.update(_docopt(command_help, command_opts['ARGS'], options_first=True))
+    if env:
+        prefix = f'{env}_'
+        env_option_keys = ((k, prefix + k.lstrip('-').replace('-', '_').upper())
+                           for k in command_opts.keys())
+        env_options = {opt_key: os.environ[env_key]
+                       for opt_key, env_key in env_option_keys
+                       if env_key in os.environ}
+        command_opts = {**env_options, **command_opts}
+
     return command_handler, command_opts
 
 
@@ -66,15 +77,7 @@ def get_handler(command_class, command):
     return getattr(instance, command)
 
 
-def perform_command(handler, options, env):
-    if env:
-        prefix = f'{env}_'
-        env_option_keys = ((k, prefix + k.lstrip('-').replace('-', '_').upper())
-                           for k in options.keys())
-        env_options = {opt_key: os.environ[env_key]
-                       for opt_key, env_key in env_option_keys
-                       if env_key in os.environ}
-        options = {**env_options, **options}
+def perform_command(handler, options):
     handler(options)
 
 
