@@ -48,7 +48,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
         raise NoSuchCommand(command, command_class)
 
     command_opts.update(_docopt(command_help, command_opts['ARGS'], options_first=True))
-    return handler, command_opts
+    return command_handler, command_opts
 
 
 def _docopt(docstring, *args, **kwargs):
