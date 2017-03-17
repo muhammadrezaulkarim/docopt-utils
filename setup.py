@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 install_requires = [
-    'docopt==0.6.2',
+    'docopt>=0.6.2',
 ]
 
 
