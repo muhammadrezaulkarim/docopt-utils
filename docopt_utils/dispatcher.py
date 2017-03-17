@@ -51,7 +51,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
     return handler, command_opts
 
 
-def _docopt(docstring, *agrs, **kwargs):
+def _docopt(docstring, *args, **kwargs):
     try:
         return docopt(docstring, *args, **kwargs)
     except DocoptExit:
