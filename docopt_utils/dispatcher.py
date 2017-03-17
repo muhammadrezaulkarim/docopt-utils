@@ -1,5 +1,6 @@
 import functools
 import logging
+import os
 import re
 import sys
 from inspect import getdoc
@@ -11,7 +12,7 @@ from docopt import DocoptExit
 log = logging.getLogger(__name__)
 
 
-def dispatch(command_classes, args=None):
+def dispatch(command_classes, args=None, env=None):
     if not args:
         args = sys.argv[1:]
     try:
@@ -21,7 +22,7 @@ def dispatch(command_classes, args=None):
         log.error(f'No such command: {e.command}\n{commands}')
         sys.exit(1)
 
-    return functools.partial(perform_command, handler, options)
+    return functools.partial(perform_command, handler, options, env)
 
 
 def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}, args=None):
@@ -65,7 +66,15 @@ def get_handler(command_class, command):
     return getattr(instance, command)
 
 
-def perform_command(handler, options):
+def perform_command(handler, options, env):
+    if env:
+        prefix = f'{env}_'
+        env_option_keys = ((k, prefix + k.lstrip('-').replace('-', '_').upper())
+                           for k in options.keys())
+        env_options = {opt_key: os.environ[env_key]
+                       for opt_key, env_key in env_option_keys
+                       if env_key in os.environ}
+        options = {**env_options, **options}
     handler(options)
 
 
