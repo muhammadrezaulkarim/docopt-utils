@@ -45,7 +45,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
     command_handler = get_handler(command_class, command)
     command_help = getdoc(handler)
     if command_help is None:
-        raise NoSuchCommand(command)
+        raise NoSuchCommand(command, command_class)
 
     command_opts.update(_docopt(command_help, command_opts['ARGS'], options_first=True))
     return handler, command_opts
