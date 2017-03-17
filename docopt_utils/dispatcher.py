@@ -41,7 +41,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
 
     if command in command_classes:
         return parse(command_classes, command=command, command_opts=command_opts,
-                     docopt_opts=docopt_opts, args=[command] + options['ARGS'])
+                     docopt_opts=docopt_opts, args=[command] + command_opts['ARGS'])
 
     if not command or command in ('-h', '--help'):
         raise SystemExit(command_help)
