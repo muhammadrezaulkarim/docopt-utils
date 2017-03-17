@@ -12,7 +12,7 @@ from docopt import DocoptExit
 log = logging.getLogger(__name__)
 
 
-def dispatch(command_classes, args=None, env=None):
+def dispatch(command_classes, before_f=None, args=None, env=None):
     if not args:
         args = sys.argv[1:]
     try:
@@ -23,6 +23,8 @@ def dispatch(command_classes, args=None, env=None):
         log.error(f'No such command: {e.command}\n{commands}')
         sys.exit(1)
 
+    if before_f:
+        before_f(handler, options)
     handler(options)
 
 
