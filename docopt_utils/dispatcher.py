@@ -23,7 +23,7 @@ def dispatch(command_classes, args=None, env=None):
         log.error(f'No such command: {e.command}\n{commands}')
         sys.exit(1)
 
-    return functools.partial(perform_command, handler, options)
+    handler(options)
 
 
 def parse(command_classes, command='__root__', command_opts=None, docopt_opts={},
@@ -75,10 +75,6 @@ def get_handler(command_class, command):
         raise NoSuchCommand(command, command_class)
     instance = command_class()
     return getattr(instance, command)
-
-
-def perform_command(handler, options):
-    handler(options)
 
 
 # From docopt@master
