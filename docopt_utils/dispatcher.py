@@ -38,6 +38,7 @@ def parse(command_classes, command='__root__', command_opts=None, docopt_opts={}
         command_opts = {}
     command_opts.update(_docopt(command_help, args, **docopt_opts))
     command = command_opts['COMMAND']
+    command = command.replace('-', '_')
 
     if command in command_classes:
         return parse(command_classes, command=command, command_opts=command_opts,
